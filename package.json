@@ -1,0 +1,25 @@
+{
+  "name": "downloader",
+  "version": "1.0.0",
+  "description": "Utility to download the mp3, img files",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "MaheshGupta Boddu",
+  "license": "ISC",
+  "dependencies": {
+    "ascii-progress": "^1.0.5",
+    "async": "^2.6.0",
+    "chalk": "^2.3.0",
+    "cheerio": "^1.0.0-rc.2",
+    "got": "^8.0.1",
+    "inquirer": "^4.0.1",
+    "lodash": "^4.17.4",
+    "moment": "^2.19.4",
+    "prompt": "^1.0.0",
+    "prompt-checkbox": "^2.2.0",
+    "youtube-mp3-downloader": "^0.5.2"
+  }
+}
