@@ -2,8 +2,8 @@ const path = require('path')
 const ProgressBar = require('ascii-progress');
 const YoutubeMp3Downloader = require("youtube-mp3-downloader");
 const Downloader = require('./downloader');
-// const dest = getDestination()
-const ffmpegPath = '/usr/bin/ffmpeg';
+const fs = require('fs');
+const ffmpegPath = '/usr/local/bin/ffmpeg';
 const colors = ['red',
     'cyan',
     'blue',
@@ -22,96 +22,67 @@ const colors = ['red',
     'brightYellow',
     'brightMagenta'];
 
-// youtubeToMp3('https://www.youtube.com/watch?v=XQlesAM8vjo', dest)
-// youtubeToMp3('https://www.youtube.com/watch?v=pJ8cS_FNaUo', dest)
 
-const dl = new Downloader(ffmpegPath, getDestination())
-let progressBar;
 let prevTick;
-let color = `percent.${getColor()}`
+let urls = [
+    'https://www.youtube.com/watch?v=k_KD8Tzh2-A',
+    'https://www.youtube.com/watch?v=TdPE0sxdd1I',
+    'https://www.youtube.com/watch?v=Q0zgq5Uec78'
+]
 
-dl.getMP3(
-    { videoId: "Vhd6Kc4TZls", name: "Cold Funk - Funkorama.mp3" },
-    () => {
-        progressBar = new ProgressBar({
-            schema: ':bar :' + color + ' :name :transferred / :size',
-        })
+urls.forEach((url, index) => {
+    let id = getID(url)
+    let destination = getDestination()
+    let progressBar;
+    const dl = new Downloader(ffmpegPath, getDestination())
+    let color = `percent.${getColor()}`;
 
-    },
-    progress => {
-        // console.log("Progress : " + JSON.stringify(progress))
-
-        let ticks = Math.round((progress.progress.transferred * 100) / progress.progress.length)
-        console.log(ticks)
-        if (ticks !== prevTick) {
-            progressBar.update(ticks, {
-                name: progress.videoId,
-                transferred: progress.progress.transferred,
-                size: progress.progress.length
-            });
-            prevTick = ticks;
+    dl.getMP3(
+        { videoId: id, name: id },
+        () => {
+            //schema: ':bar :' + color + ' :name :transferred / :size :speed kbps',
+            progressBar = new ProgressBar({
+                schema: ':bar :' + color + ' :name  :speed kbps',
+            })
+        },
+        progress => {
+            // console.log(JSON.stringify(progress, null, ' '))
+            let ticks = Math.round((progress.progress.transferred * 100) / progress.progress.length)
+            if (ticks !== prevTick) {
+                progressBar.update(ticks / 100, {
+                    name: progress.videoId,
+                    // transferred: progress.progress.transferred,
+                    // size: progress.progress.length,
+                    speed: Math.round((progress.progress.speed / 1000))
+                });
+                prevTick = ticks;
+            }
+        },
+        (error, data) => {
+            if (error) { console.log("Error :" + err) }
+            else {
+                let source = data.file;
+                let target = destination + "/" + data.videoTitle
+                target = target.replace(/\s+/g, '') + ".mp3";
+                fs.rename(source, target, err => {
+                    if (err) {
+                        console.log(`Failed renaming ${target} - ${err}`)
+                    }
+                })
+            }
         }
-    },
-    (error, data) => {
-        if (error) { console.log("Error :" + err) }
-        else { console.log(JSON.stringify(data)) }
-    }
-)
+    )
+})
 
 
 
 
 
-// function youtubeToMp3(url, dest) {
+function getID(url) {
+    return path.basename(url).replace("watch?v=", "")
+}
 
-//     const YD = new YoutubeMp3Downloader({
-//         "ffmpegPath": ffmpegPath,        // Where is the FFmpeg binary located?
-//         "outputPath": dest,    // Where should the downloaded and encoded files be stored?
-//         "youtubeVideoQuality": "highest",       // What video quality should be used?
-//         "queueParallelism": 2,                  // How many parallel downloads/encodes should be started?
-//         "progressTimeout": 2000                 // How long should be the interval of the progress reports
-//     });
 
-//     let progressBar;
-//     let prevTick = 0;
-//     let color = `percent.${getColor()}`
-
-//     //Download video and save as MP3 file
-
-//     const id = path.basename(url).replace('watch?v=', "")
-//     console.log("ID : " + id)
-
-//     YD.on("finished", function (err, data) {
-//         console.log(JSON.stringify(data));
-//     });
-
-//     YD.on("error", function (error) {
-//         console.log("Some error while donwloading : " + error)
-//     });
-
-//     YD.on("progress", function (progress) {
-//         console.log("Here1")
-//         if (progressBar == undefined) {
-//             progressBar = new ProgressBar({
-//                 schema: ':bar :' + color + ' :name :transferred / :size',
-//             })
-//             console.log("Here2")
-//         }
-//         console.log("Here3")
-
-//         let ticks = Math.round((progress.transferred * 100) / progress.length)
-//         if (ticks !== prevTick) {
-//             progressBar.tick({
-//                 name: progress.videoId,
-//                 transferred: progress.transferred,
-//                 size: progress.length
-//             });
-//             prevTick = ticks;
-//         }
-//     });
-//     YD.download(id);
-
-// }
 
 function getColor() {
     const index = Math.floor(Math.random() * colors.length, colors.length)

@@ -50,7 +50,7 @@ Downloader.prototype.getMP3 = function (track, onStart = () => { }, onProgress =
     self.callbacks[track.videoId] = callback;
     self.onProgressCallbacks[track.videoId] = onProgress
     // Trigger download
-    console.log("Track : " + JSON.stringify(track, null, ' '))
+    // console.log("Track : " + JSON.stringify(track, null, ' '))
     onStart()
     console.log("Please wait...")
     self.YD.download(track.videoId, track.name);
